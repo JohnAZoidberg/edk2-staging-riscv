@@ -269,8 +269,9 @@ CpuSetMemoryAttributes (
   )
 {
   DEBUG ((DEBUG_INFO, "%a: Set memory attributes not supported yet\n", __FUNCTION__));
-  ASSERT (FALSE);
-  return EFI_UNSUPPORTED;
+  //ASSERT (FALSE);
+  //return EFI_UNSUPPORTED;
+  return EFI_SUCCESS;
 }
 
 /**
