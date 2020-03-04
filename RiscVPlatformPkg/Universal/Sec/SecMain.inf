@@ -79,4 +79,6 @@
   gUefiRiscVPlatformPkgTokenSpaceGuid.PcdTemporaryRamBase
   gUefiRiscVPlatformPkgTokenSpaceGuid.PcdTemporaryRamSize
 
-
+[BuildOptions]
+  # This does not get passed to the assembler. I Have to hardcode the path in the .S file :(
+  GCC:*_*_RISCV64_ASM_FLAGS = -DFW_FDT_PATH=U540.dtb

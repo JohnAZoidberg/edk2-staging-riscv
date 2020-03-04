@@ -161,6 +161,7 @@ typedef struct {
     RISCV_UINT128          MachineArchId;          // Machine Architecture ID
     RISCV_UINT128          MachineImplId;          // Machine Implementation ID
     RISCV_HART_SWITCH_MODE HartSwitchMode;         // OpenSBI's function to switch the mode of a hart
+    UINT64                 Dtb;                    // Pointer to Flattened Device Tree
 } EFI_RISCV_FIRMWARE_CONTEXT_HART_SPECIFIC;
 
 #define FIRMWARE_CONTEXT_HART_SPECIFIC_SIZE  (64 * 7)

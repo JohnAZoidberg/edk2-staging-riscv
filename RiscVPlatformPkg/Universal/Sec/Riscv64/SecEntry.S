@@ -412,19 +412,14 @@ _reset_regs:
 
   .align 3
   .section .entry, "ax", %progbits
-  .global fw_prev_arg1
-fw_prev_arg1:
-
-  /* We return previous arg1 in 'a0' */
-  add a0, zero, zero
-  ret
-
-  .align 3
-  .section .entry, "ax", %progbits
   .global fw_next_arg1
 fw_next_arg1:
   /* We return next arg1 in 'a0' */
-  li a0, FixedPcdGet32(PcdRiscVPeiFvBase)
+// #ifdef FW_FDT_PATH
+  la      a0, fdt_bin
+// #else
+//   fooadd     a0, zero, zero
+// #endif
   ret
 
   .align 3
@@ -440,3 +435,11 @@ fw_next_addr:
   .section .entry, "ax", %progbits
 _jump_addr:
 RISCV_PTR SecCoreStartUpWithStack
+
+// #ifdef FW_FDT_PATH
+  .section .text, "ax", %progbits
+  .align 4
+  .globl fdt_bin
+fdt_bin:
+  .incbin "U540.dtb"
+// #endif

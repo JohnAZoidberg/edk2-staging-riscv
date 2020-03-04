@@ -443,7 +443,8 @@ EFI_STATUS EFIAPI TemporaryRamDone (VOID)
 VOID
 EFIAPI
 PeiCore (
-  IN  UINTN ThisHartId
+  IN  UINTN ThisHartId,
+  IN  UINTN NextArg1
 )
 {
   EFI_SEC_PEI_HAND_OFF        SecCoreData;
@@ -452,6 +453,9 @@ PeiCore (
   EFI_RISCV_OPENSBI_FIRMWARE_CONTEXT FirmwareContext;
   struct sbi_platform *ThisSbiPlatform;
   UINT32 HartId;
+
+  DEBUG ((DEBUG_INFO, "Foo: Next Arg1 is: 0x%x\n\n", NextArg1));
+  DEBUG ((DEBUG_INFO, "Foo: Next Arg1 derefd is: 0x%x\n\n", *((UINTN *) NextArg1)));
 
   FindAndReportEntryPoints (&BootFv, &PeiCoreEntryPoint);
 
@@ -570,6 +574,7 @@ VOID EFIAPI SecCoreStartUpWithStack(UINTN HartId, struct sbi_scratch *Scratch)
   HartFirmwareContext->MachineImplId.Value64_L = RiscVReadMachineImplementId ();
   HartFirmwareContext->MachineImplId.Value64_H = 0;
   HartFirmwareContext->HartSwitchMode = RiscVOpenSbiHartSwitchMode;
+  HartFirmwareContext->Dtb = Scratch->next_arg1;
 
 #if DEBUG_MSG_HART_INFO
   while (HartsIn != HartId);
@@ -588,6 +593,7 @@ VOID EFIAPI SecCoreStartUpWithStack(UINTN HartId, struct sbi_scratch *Scratch)
     Scratch->next_addr = (UINTN)PeiCore;
     Scratch->next_mode = PRV_M;
     DEBUG ((DEBUG_INFO, "%a: Initializing OpenSBI library for booting hart\n", __FUNCTION__));
+    DEBUG ((DEBUG_INFO, "Next Arg1 is: 0x%x\n\n", Scratch->next_arg1));
     sbi_init(Scratch);
   }
   sbi_init(Scratch);
