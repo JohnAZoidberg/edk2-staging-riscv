@@ -23,10 +23,16 @@
   RiscVDxeIplHandoffOpenSbiLib.c
 
 [Packages]
+  EmbeddedPkg/EmbeddedPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   RiscVPkg/RiscVPkg.dec
 
 [LibraryClasses]
   DebugLib
+  FdtLib
+  HobLib
   RiscVCpuLib
+
+[Guids]
+  gRiscVDtbHobGuid  ## PRODUCES

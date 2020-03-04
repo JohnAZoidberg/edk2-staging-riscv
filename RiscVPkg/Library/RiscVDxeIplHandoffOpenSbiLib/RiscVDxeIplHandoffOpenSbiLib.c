@@ -18,6 +18,7 @@
 #include <sbi/sbi_platform.h>
 #include <Library/RiscVCpuLib.h>
 #include <Library/RiscVPlatformDxeIpl.h>
+#include <libfdt.h>
 
 /**
    RISC-V platform DXE IPL to DXE OpenSBI mdoe switch handler.
@@ -54,6 +55,21 @@ RiscVDxeIplHandoffOpenSbiHandler (
   UNREACHABLE();
 }
 
+EFI_STATUS
+EFIAPI
+BuildDtbHob (
+  IN  UINT64 DtbPtr
+  )
+{
+  VOID       *HobData;
+  if (fdt_check_header ((VOID*)DtbPtr) != 0) {
+    DEBUG ((DEBUG_INFO, "FDT header is invalid\n"));
+    return EFI_LOAD_ERROR;
+  }
+  DEBUG ((DEBUG_INFO, "Installing DTB Hob with length: %d\n", fdt_totalsize(DtbPtr)));
+  HobData = BuildGuidDataHob (&gRiscVDtbHobGuid, (VOID *)DtbPtr, fdt_totalsize(DtbPtr));
+  return HobData != NULL ? EFI_SUCCESS : EFI_LOAD_ERROR;
+}
 
 /**
    RISC-V platform DXE IPL to DXE core handoff process.
@@ -81,11 +97,14 @@ RiscVPlatformHandOffToDxeCore (
   OPENSBI_SWITCH_MODE_CONTEXT OpenSbiSwitchModeContext;
   struct sbi_platform *ThisSbiPlatform;
   EFI_RISCV_OPENSBI_FIRMWARE_CONTEXT *FirmwareContext;
+  UINTN ThisHartid = sbi_current_hartid();
 
   ThisScratch = sbi_scratch_thishart_ptr ();
   ThisSbiPlatform = (struct sbi_platform *)sbi_platform_ptr(ThisScratch);
   FirmwareContext = (EFI_RISCV_OPENSBI_FIRMWARE_CONTEXT *)ThisSbiPlatform->firmware_context;
 
+  Status = BuildDtbHob (FirmwareContext->HartSpecific[ThisHartid]->Dtb);
+  ASSERT_EFI_ERROR (Status);
 
   //
   // End of PEI phase signal
@@ -112,8 +131,6 @@ RiscVPlatformHandOffToDxeCore (
   DEBUG ((DEBUG_INFO, "          OpenSBI Switch mode arg1: 0x%x\n", (UINTN)&OpenSbiSwitchModeContext));
   DEBUG ((DEBUG_INFO, "          OpenSBI Switch mode handler address: 0x%x\n", (UINTN)RiscVDxeIplHandoffOpenSbiHandler));
   DEBUG ((DEBUG_INFO, "          OpenSBI Switch mode to privilege 0x%x\n", PRV_S));
-  //sbi_init (ThisScratch);
-  UINTN ThisHartid = sbi_current_hartid();
   FirmwareContext->HartSpecific[ThisHartid]->HartSwitchMode(
     ThisHartid,
     (UINTN)&OpenSbiSwitchModeContext,
